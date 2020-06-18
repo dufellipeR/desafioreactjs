@@ -9,7 +9,7 @@ import Upload from '../../components/Upload';
 
 import { Container, Title, ImportFileContainer, Footer } from './styles';
 
-import alert from '../../assets/alert.svg';
+import alertImg from '../../assets/alert.svg';
 import api from '../../services/api';
 
 interface FileProps {
@@ -23,19 +23,36 @@ const Import: React.FC = () => {
   const history = useHistory();
 
   async function handleUpload(): Promise<void> {
-    // const data = new FormData();
+    if (!uploadedFiles.length) {
+      alert("Arraste os arquivos para o quadriculado")
+      return;
+    }
 
-    // TODO
+    const data = new FormData();
+
+
+    const file = uploadedFiles[0]
+
+    data.append('file', file.file, file.name)
 
     try {
-      // await api.post('/transactions/import', data);
+      await api.post('/transactions/import', data);
+
+      history.push('/');
     } catch (err) {
-      // console.log(err.response.error);
+      console.log(err.response.error);
     }
   }
 
   function submitFile(files: File[]): void {
-    // TODO
+    const uploadFiles = files.map(file => ({
+      file,
+      name: file.name,
+      readableSize: filesize(file.size)
+
+    }));
+
+    setUploadedFiles(uploadFiles);
   }
 
   return (
@@ -49,7 +66,7 @@ const Import: React.FC = () => {
 
           <Footer>
             <p>
-              <img src={alert} alt="Alert" />
+              <img src={alertImg} alt="Alert" />
               Permitido apenas arquivos CSV
             </p>
             <button onClick={handleUpload} type="button">
