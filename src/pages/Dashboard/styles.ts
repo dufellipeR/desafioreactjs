@@ -93,3 +93,20 @@ export const TableContainer = styled.section`
     }
   }
 `;
+
+export const NoTransactions = styled.div`
+  margin-top: 115px;
+  color: #363f5f;
+  h1 {
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 54px;
+
+    text-align: center;
+  }
+
+  p {
+    font-size: 16px;
+    text-align: center;
+  }
+`;

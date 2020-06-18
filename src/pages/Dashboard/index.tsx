@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import { format } from 'util';
+import { Link } from 'react-router-dom';
 import income from '../../assets/income.svg';
 import outcome from '../../assets/outcome.svg';
 import total from '../../assets/total.svg';
@@ -10,8 +12,13 @@ import Header from '../../components/Header';
 
 import formatValue from '../../utils/formatValue';
 
-import { Container, CardContainer, Card, TableContainer } from './styles';
-import { format } from 'util';
+import {
+  Container,
+  CardContainer,
+  Card,
+  TableContainer,
+  NoTransactions,
+} from './styles';
 
 interface Transaction {
   id: string;
@@ -36,27 +43,27 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadTransactions(): Promise<void> {
-      const response = await api.get("/transactions");
-      const data = response.data
+      const response = await api.get('/transactions');
+      const { data } = response;
 
-      const transactionsFormatted = data.transactions.map((transaction: Transaction) => ({
-        ...transaction,
-        formattedValue: formatValue(transaction.value),
-        formattedDate: new Date(transaction.created_at).toLocaleDateString()
-      }));
+      const transactionsFormatted = data.transactions.map(
+        (transaction: Transaction) => ({
+          ...transaction,
+          formattedValue: formatValue(transaction.value),
+          formattedDate: new Date(transaction.created_at).toLocaleDateString(),
+        }),
+      );
 
       const balanceFormatted = {
         income: formatValue(data.balance.income),
         outcome: formatValue(data.balance.outcome),
         total: formatValue(data.balance.total),
-      }
+      };
 
       console.log(data.transactions);
       setTransactions(transactionsFormatted);
-      setBalance(balanceFormatted)
+      setBalance(balanceFormatted);
       console.log('transactions: ', transactions);
-
-
     }
 
     loadTransactions();
@@ -89,32 +96,43 @@ const Dashboard: React.FC = () => {
             <h1 data-testid="balance-total">{balance.total}</h1>
           </Card>
         </CardContainer>
-
-        <TableContainer>
-          <table>
-            <thead>
-              <tr>
-                <th>Título</th>
-                <th>Preço</th>
-                <th>Categoria</th>
-                <th>Data</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {transactions.map(transaction => (
-                <tr key={transaction.id}>
-                  <td className="title">{transaction.title}</td>
-                  <td className={transaction.type}>
-                    {transaction.type === 'outcome' && '- '}
-                    {transaction.formattedValue}</td>
-                  <td>{transaction.category.title}</td>
-                  <td>{transaction.formattedDate}</td>
+        {!!transactions.length && (
+          <TableContainer>
+            <table>
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Preço</th>
+                  <th>Categoria</th>
+                  <th>Data</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </TableContainer>
+              </thead>
+
+              <tbody>
+                {transactions.map(transaction => (
+                  <tr key={transaction.id}>
+                    <td className="title">{transaction.title}</td>
+                    <td className={transaction.type}>
+                      {transaction.type === 'outcome' && '- '}
+                      {transaction.formattedValue}
+                    </td>
+                    <td>{transaction.category.title}</td>
+                    <td>{transaction.formattedDate}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TableContainer>
+        )}
+        {!transactions.length && (
+          <NoTransactions>
+            <h1>Não há transações! </h1>
+            <p>
+              Adicione novas transações
+              <Link to="/transaction"> aqui</Link>
+            </p>
+          </NoTransactions>
+        )}
       </Container>
     </>
   );
